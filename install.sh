@@ -194,21 +194,21 @@ run_tests() {
 
   SESSION="test_install_$$"
 
-  # 1) buffer 테스트
-  echo '{"session_id":"'"$SESSION"'","tool_name":"Edit","tool_input":{"file_path":"/tmp/test.py","old_string":"a","new_string":"a\nb"}}' \
+  # 1) buffer 테스트 (printf로 JSON 출력 — zsh echo의 \n 해석 방지)
+  printf '%s' '{"session_id":"'"$SESSION"'","tool_name":"Edit","tool_input":{"file_path":"/tmp/test.py","old_string":"a","new_string":"ab"}}' \
     | python3 "$HOOKS_DIR/slack_buffer.py"
 
-  echo '{"session_id":"'"$SESSION"'","tool_name":"Bash","tool_input":{"command":"make test"}}' \
+  printf '%s' '{"session_id":"'"$SESSION"'","tool_name":"Bash","tool_input":{"command":"make test"}}' \
     | python3 "$HOOKS_DIR/slack_buffer.py"
 
   # 2) stop 테스트 (Slack 발송)
   echo "  → Stop hook 테스트 (Slack 발송)..."
-  echo '{"session_id":"'"$SESSION"'","stop_hook_active":true,"cwd":"/tmp","transcript_path":""}' \
+  printf '%s' '{"session_id":"'"$SESSION"'","stop_hook_active":true,"cwd":"/tmp","transcript_path":""}' \
     | python3 "$HOOKS_DIR/slack_stop.py" && success "Stop hook 전송 성공"
 
   # 3) notify 테스트
   echo "  → Notification hook 테스트..."
-  echo '{"session_id":"'"$SESSION"'","message":"파일을 덮어쓸까요?","cwd":"/tmp","transcript_path":""}' \
+  printf '%s' '{"session_id":"'"$SESSION"'","message":"파일을 덮어쓸까요?","cwd":"/tmp","transcript_path":""}' \
     | python3 "$HOOKS_DIR/slack_notify.py" && success "Notification hook 전송 성공"
 
   echo ""
