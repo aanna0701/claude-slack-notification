@@ -3,6 +3,7 @@
 
 import json
 import os
+import platform
 import subprocess
 import sys
 import urllib.error
@@ -30,37 +31,42 @@ def get_server_info() -> dict:
         except Exception:
             return ""
 
+    system = platform.system()  # 'Darwin' | 'Linux' | 'Windows'
     hostname = run(["hostname"])
-    ip = run(
-        "hostname -I 2>/dev/null | awk '{print $1}' || ipconfig getifaddr en0 2>/dev/null || echo ''",
-        shell=True,
-    )
-    os_name = run(
-        "cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d'\"' -f2"
-        " || sw_vers -productName 2>/dev/null || echo 'Unknown OS'",
-        shell=True,
-    )
-    arch = run(["uname", "-m"])
+    arch = platform.machine() or run(["uname", "-m"])
 
-    try:
-        chassis = int(run(["cat", "/sys/class/dmi/id/chassis_type"]))
-        device = "Laptop" if chassis in (9, 10) else "Rack" if chassis == 17 else "Desktop"
-    except Exception:
-        model = run("sysctl -n hw.model 2>/dev/null || echo ''", shell=True)
-        if "MacBook" in model:
-            device = "Laptop"
-        elif "Mac" in model:
-            device = "Desktop"
-        else:
+    if system == "Darwin":
+        ver = platform.mac_ver()[0]
+        os_name = f"macOS {ver}" if ver else "macOS"
+        os_emoji = "🍎"
+        ip = (
+            run(["ipconfig", "getifaddr", "en0"])
+            or run(["ipconfig", "getifaddr", "en1"])
+        )
+        model_name = run(
+            "system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Model Name/{print $2; exit}'",
+            shell=True,
+        )
+        device = "Laptop" if "MacBook" in model_name else "Desktop"
+
+    elif system == "Linux":
+        os_name = run(
+            "grep -m1 PRETTY_NAME /etc/os-release 2>/dev/null | cut -d'\"' -f2 || echo 'Linux'",
+            shell=True,
+        )
+        os_emoji = "🐧"
+        ip = run("hostname -I 2>/dev/null | awk '{print $1}'", shell=True)
+        try:
+            chassis = int(run(["cat", "/sys/class/dmi/id/chassis_type"]))
+            device = "Laptop" if chassis in (9, 10) else "Rack" if chassis == 17 else "Desktop"
+        except Exception:
             device = "Server"
 
-    os_lower = os_name.lower()
-    if "mac" in os_lower or "darwin" in os_lower:
-        os_emoji = "🍎"
-    elif "windows" in os_lower:
+    else:  # Windows
+        os_name = f"Windows {platform.version()}"
         os_emoji = "🪟"
-    else:
-        os_emoji = "🐧"
+        ip = run("ipconfig | findstr /i 'IPv4' | head -1 | awk '{print $NF}'", shell=True)
+        device = "Desktop"
 
     return {
         "hostname": hostname or "unknown",
