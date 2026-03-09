@@ -51,7 +51,7 @@ def get_server_info() -> dict:
 
     elif system == "Linux":
         os_name = run(
-            "grep -m1 PRETTY_NAME /etc/os-release 2>/dev/null | cut -d'\"' -f2 || echo 'Linux'",
+            "[ -f /etc/os-release ] && grep -m1 PRETTY_NAME /etc/os-release | cut -d'\"' -f2 || echo 'Linux'",
             shell=True,
         )
         os_emoji = "🐧"
