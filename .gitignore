@@ -1,0 +1,10 @@
+# 실제 설정 파일 (토큰 포함) — 절대 커밋하지 않음
+hooks/slack_config.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
