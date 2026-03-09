@@ -24,7 +24,7 @@ echo "  $HOOKS_DIR/slack_notify.py"
 echo "  $HOOKS_DIR/slack_config.json"
 echo "  settings.json에서 관련 hooks 항목"
 echo ""
-read -rp "계속하시겠습니까? [y/N] " CONFIRM
+printf "계속하시겠습니까? [y/N] "; read -r CONFIRM
 if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
   info "취소됨."
   exit 0

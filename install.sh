@@ -6,7 +6,7 @@ set -euo pipefail
 
 HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # ── Colors ───────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -48,7 +48,7 @@ collect_config() {
   # 이미 설정 파일이 있으면 덮어쓸지 확인
   if [[ -f "$CONFIG_FILE" ]]; then
     warn "기존 설정 파일이 있습니다: $CONFIG_FILE"
-    read -rp "덮어쓰시겠습니까? [y/N] " OVERWRITE
+    printf "덮어쓰시겠습니까? [y/N] "; read -r OVERWRITE
     if [[ "$OVERWRITE" != "y" && "$OVERWRITE" != "Y" ]]; then
       info "기존 설정을 유지합니다."
       return
@@ -56,11 +56,11 @@ collect_config() {
   fi
 
   echo "Slack Bot Token (xoxb-...):"
-  read -rp "  > " BOT_TOKEN
+  printf "  > "; read -r BOT_TOKEN
   echo ""
 
   echo "Slack 채널 ID (C...) — Slack 채널 URL의 마지막 부분:"
-  read -rp "  > " CHANNEL_ID
+  printf "  > "; read -r CHANNEL_ID
   echo ""
 
   if [[ -z "$BOT_TOKEN" || -z "$CHANNEL_ID" ]]; then
