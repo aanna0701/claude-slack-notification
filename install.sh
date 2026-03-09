@@ -83,7 +83,7 @@ install_hooks() {
   info "Hook 파일 설치 중..."
   mkdir -p "$HOOKS_DIR"
 
-  for hook in slack_buffer.py slack_stop.py slack_notify.py; do
+  for hook in slack_common.py slack_buffer.py slack_stop.py slack_notify.py; do
     cp "$SCRIPT_DIR/hooks/$hook" "$HOOKS_DIR/$hook"
     chmod +x "$HOOKS_DIR/$hook"
     success "설치됨: $HOOKS_DIR/$hook"
