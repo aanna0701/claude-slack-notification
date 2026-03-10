@@ -32,18 +32,27 @@ def detect_agent() -> tuple[str, str]:
     if any(k.startswith("CLAUDE_") for k in env):
         return "Claude Code", "🤖"
 
-    # 부모 프로세스 이름 기반 감지
+    # 부모 프로세스 이름 기반 감지 (최대 5단계 순회)
     try:
-        ppid = os.getppid()
-        parent_cmd = subprocess.check_output(
-            ["ps", "-p", str(ppid), "-o", "comm="],
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip().lower()
-        if "claude" in parent_cmd:
-            return "Claude Code", "🤖"
-        if "cursor" in parent_cmd:
-            return "Cursor", "🎯"
+        pid = os.getpid()
+        for _ in range(5):
+            result = subprocess.check_output(
+                ["ps", "-p", str(pid), "-o", "ppid=,comm="],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            parts = result.split(None, 1)
+            if len(parts) < 2:
+                break
+            ppid_str, cmd = parts
+            cmd = cmd.lower()
+            if "claude" in cmd:
+                return "Claude Code", "🤖"
+            if "cursor" in cmd:
+                return "Cursor", "🎯"
+            pid = int(ppid_str)
+            if pid <= 1:
+                break
     except Exception:
         pass
 
