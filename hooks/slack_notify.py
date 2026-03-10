@@ -68,6 +68,7 @@ def main():
 
     text = (
         f"*🔔 확인 필요 — {task}*\n"
+        f"{info['agent_emoji']}  {info['agent_name']}\n"
         f"🖥️  {info['hostname']} ({info['ip']})\n"
         f"{info['os_emoji']}  {info['os_name']}  •  {info['arch']}  •  {info['device']}\n"
         f"📁  {cwd}\n"

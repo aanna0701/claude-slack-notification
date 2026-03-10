@@ -22,6 +22,34 @@ def load_config() -> tuple[str, str]:
         return "", ""
 
 
+def detect_agent() -> tuple[str, str]:
+    """실행 중인 AI 에이전트 감지. (name, emoji) 반환."""
+    env = os.environ
+
+    # 환경변수 기반 감지
+    if any(k.startswith("CURSOR_") for k in env):
+        return "Cursor", "🎯"
+    if any(k.startswith("CLAUDE_") for k in env):
+        return "Claude Code", "🤖"
+
+    # 부모 프로세스 이름 기반 감지
+    try:
+        ppid = os.getppid()
+        parent_cmd = subprocess.check_output(
+            ["ps", "-p", str(ppid), "-o", "comm="],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip().lower()
+        if "claude" in parent_cmd:
+            return "Claude Code", "🤖"
+        if "cursor" in parent_cmd:
+            return "Cursor", "🎯"
+    except Exception:
+        pass
+
+    return "Unknown Agent", "🤖"
+
+
 def get_server_info() -> dict:
     def run(*args, **kw) -> str:
         try:
@@ -68,6 +96,8 @@ def get_server_info() -> dict:
         ip = run("ipconfig | findstr /i 'IPv4' | head -1 | awk '{print $NF}'", shell=True)
         device = "Desktop"
 
+    agent_name, agent_emoji = detect_agent()
+
     return {
         "hostname": hostname or "unknown",
         "ip": ip or "?.?.?.?",
@@ -75,6 +105,8 @@ def get_server_info() -> dict:
         "arch": arch or "unknown",
         "device": device,
         "os_emoji": os_emoji,
+        "agent_name": agent_name,
+        "agent_emoji": agent_emoji,
     }
 
 

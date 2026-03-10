@@ -58,6 +58,7 @@ def format_message(
 
     header = (
         f"*🔷 {task_name}*\n"
+        f"{info['agent_emoji']}  {info['agent_name']}\n"
         f"🖥️  {info['hostname']} ({info['ip']})\n"
         f"{info['os_emoji']}  {info['os_name']}  •  {info['arch']}  •  {info['device']}\n"
         f"📁  {cwd}\n"
