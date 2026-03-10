@@ -148,31 +148,27 @@ new_hooks = {
 
 existing_hooks = settings.get("hooks", {})
 
-def merge_hook_list(existing: list, new_entries: list, match_key: str) -> list:
-    """중복 없이 머지. command 경로로 중복 판별."""
-    result = list(existing)
-    for new_entry in new_entries:
-        new_cmds = {
-            h["command"]
-            for h in new_entry.get("hooks", [])
-            if "command" in h
-        }
-        # 동일 command가 이미 있으면 스킵
-        already_exists = any(
-            new_cmds & {
-                h["command"]
-                for h in existing_entry.get("hooks", [])
-                if "command" in h
-            }
-            for existing_entry in result
+# 이 설치 스크립트가 관리하는 스크립트 파일명 목록
+MANAGED_SCRIPTS = {"slack_buffer.py", "slack_notify.py", "slack_stop.py", "slack_common.py"}
+
+def is_managed_command(cmd: str) -> bool:
+    """command 문자열에 관리 스크립트가 포함되어 있으면 True."""
+    return any(s in cmd for s in MANAGED_SCRIPTS)
+
+def replace_hook_list(existing: list, new_entries: list) -> list:
+    """기존 목록에서 관리 스크립트 관련 항목을 모두 제거한 뒤 새 항목을 추가."""
+    filtered = [
+        entry for entry in existing
+        if not any(
+            is_managed_command(h.get("command", ""))
+            for h in entry.get("hooks", [])
         )
-        if not already_exists:
-            result.append(new_entry)
-    return result
+    ]
+    return filtered + new_entries
 
 for event, entries in new_hooks.items():
-    existing_hooks[event] = merge_hook_list(
-        existing_hooks.get(event, []), entries, "command"
+    existing_hooks[event] = replace_hook_list(
+        existing_hooks.get(event, []), entries
     )
 
 settings["hooks"] = existing_hooks
