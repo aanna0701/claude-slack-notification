@@ -168,6 +168,14 @@ def main():
     msg = format_message(actions, info, cwd, first_user, last_assistant)
     send_slack(bot_token, channel_id, msg, caller="slack_stop")
 
+    # 완료 마커 생성 — 이후 Notification hook이 중복 발송하지 않도록
+    done_path = f"/tmp/claude_done_{session_id}"
+    try:
+        with open(done_path, "w") as f:
+            f.write(datetime.now().isoformat())
+    except Exception:
+        pass
+
 
 if __name__ == "__main__":
     main()

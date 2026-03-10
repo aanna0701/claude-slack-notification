@@ -49,6 +49,12 @@ def main():
     if not message:
         return
 
+    # 이미 완료 알림이 발송된 세션이면 중복 발송 skip
+    session_id = data.get("session_id", "unknown")
+    done_path = f"/tmp/claude_done_{session_id}"
+    if os.path.exists(done_path):
+        return
+
     cwd = data.get("cwd", "")
     transcript_path = data.get("transcript_path", "")
     first_user = get_first_user_message(transcript_path) if transcript_path else ""

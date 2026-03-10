@@ -76,6 +76,14 @@ def main():
     session_id = data.get("session_id", "unknown")
     buf_path = f"/tmp/claude_notify_{session_id}.jsonl"
 
+    # 새 작업 시작 시 완료 마커 제거 — 이후 Notification 다시 활성화
+    done_path = f"/tmp/claude_done_{session_id}"
+    if os.path.exists(done_path):
+        try:
+            os.unlink(done_path)
+        except Exception:
+            pass
+
     with open(buf_path, "a") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
